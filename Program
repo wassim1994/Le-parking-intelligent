@@ -1,0 +1,135 @@
+#include<Servo.h>
+#include <Wire.h>
+#include <Adafruit_NFCShield_I2C.h>
+Servo s1; //servo barriere 1
+Servo s2; // servo barriere 2
+int x; // valeur res1
+int y; // valeur res2
+int val1=1; // res1
+int val2=0;//res2
+int a=4;
+int b=5;
+int c=6;
+int d=7;
+char compt=9;
+#define IRQ   (2)
+#define RESET (3)  // Not connected by default on the NFC Shield
+
+Adafruit_NFCShield_I2C nfc(IRQ, RESET);
+int i;
+void setup()
+{
+  s1.attach(9);
+  s2.attach(10);
+  pinMode(val1,OUTPUT);
+  pinMode(val2,OUTPUT);
+ s1.write(10);
+ s2.write(10);
+  pinMode(a,OUTPUT);
+  pinMode(b,OUTPUT);
+  pinMode(c,OUTPUT);
+  pinMode(d,OUTPUT);
+  afficher(compt);
+   Serial.begin(115200);
+nfc.begin();
+  //configure board to read RFID tags
+  nfc.SAMConfig();
+ Serial.println("Waiting for an ISO14443A Card ...");
+}
+
+void loop()
+{
+/*  x=analogRead(val1);
+  while(x>200){
+    x=analogRead(val1);
+     delay(100);}
+  while(x>200){
+    x=analogRead(val1);
+    delay(100);}
+if(compt==0); 
+else{ 
+s1.write(100);
+delay(5000);
+s1.write(10);
+compt--;
+afficher(compt);}
+
+ y=analogRead(val2);
+ while(y>200){
+  y=analogRead(val2);
+   delay(100);}
+  while(y>200){
+    y=analogRead(val2);
+    delay(100);}
+ s2.write(100);
+ delay(5000);*/
+  uint8_t success;
+  uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
+  uint8_t uid1[]={0x8E,0xE0,0x9D,0xB4,0,0,0}; 
+  uint8_t uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
+    
+ x=analogRead(val1);
+  y=analogRead(val2);
+
+while((x>200) && (y>200))
+{
+  x=analogRead(val1);
+  y=analogRead(val2);
+  delay(100);
+}
+while((x>200) && (y>200))
+{
+  x=analogRead(val1);
+  y=analogRead(val2);
+  delay(100);
+}
+if((x<=200) && (compt!=0))
+{  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+i=0;
+ while((uid[i]==uid1[i]) && (i<4))
+{i++;}
+if(i==4)
+  {
+  s1.write(100);
+  delay(3000);
+  s1.write(10);
+  compt--;
+  } } 
+else {
+  s2.write(100);
+  delay(3000);
+  s2.write(10);
+  compt++;
+}
+afficher(compt);
+delay(1000);
+ 
+}
+ void afficher(char chiffre)
+ {
+   digitalWrite(a,LOW);
+   digitalWrite(b,LOW);
+   digitalWrite(c,LOW);
+   digitalWrite(d,LOW);
+   if(chiffre >=8)
+   {
+     digitalWrite(d,HIGH);
+     chiffre=chiffre-8;
+   }
+   if(chiffre >=4)
+   {
+     digitalWrite(c,HIGH);
+     chiffre=chiffre-4;
+   }
+   if(chiffre>=2)
+   {
+     digitalWrite(b,HIGH);
+     chiffre=chiffre-2;}
+     if(chiffre>=1)
+     {
+       digitalWrite(a,HIGH);
+     }
+ }
+   
+   
+
